@@ -2,10 +2,23 @@ import express from "express";
 
 const app = express()
 
-///?firstName=Rafael&lastName=Merlotto
-app.get('/', (req, res) => {
+
+let count = 0;
+
+app.get(`/`, (req, res) => {
+    const minus = Number(req.query.minus);
+    if (Number.isInteger(minus)) {
+        count -= minus
+    } else {
+        count += 1;
+    }
+
     console.log(req.query)
-    return res.send("<h1>Hello Rafael</h1> <p> Questo è il nostro primo server</p>");
+    return res.send(`
+    <h1>Hello Rafael</h1> 
+    <p> Questo è il nostro primo server</p>
+    <h1>Numeri di acessi: ${count}</h1>
+    `);
 })
 
 app.get('/greeting/:name', (req, res) => {
