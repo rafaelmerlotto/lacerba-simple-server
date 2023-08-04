@@ -2,8 +2,10 @@ import express from "express";
 
 const app = express()
 
+///?firstName=Rafael&lastName=Merlotto
 app.get('/', (req, res) => {
-    return res.status(200).send("<h1>Hello Rafael</h1> <p> Questo è il nostro primo server</p>");
+    console.log(req.query)
+    return res.send("<h1>Hello Rafael</h1> <p> Questo è il nostro primo server</p>");
 })
 
 app.get('/greeting/:name', (req, res) => {
