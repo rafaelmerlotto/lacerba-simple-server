@@ -77,6 +77,17 @@ app.put('/posts/:id', (req, res) => {
 })
 
 
+app.post('/posts/:id/public', (req, res) => {
+    const id = Number(req.params.id)
+    const postToPublicIdx = posts.findIndex(post => post.id === id)
+    if (!posts[postToPublicIdx]) {
+        return res.status(404).send({ msg: 'not found' });
+    }
+    posts[postToPublicIdx].draft = true
+    return res.send(posts[postToPublicIdx]);
+})
+
+
 
 app.listen(port, () => {
     console.log('Server started ate http://localhost:3000')
