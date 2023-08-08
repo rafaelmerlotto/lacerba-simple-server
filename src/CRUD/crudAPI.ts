@@ -1,6 +1,7 @@
 import express from 'express';
 
 const app = express();
+
 const port = 3000;
 app.use(express.json());
 
@@ -12,6 +13,18 @@ interface BlogPost {
     id: number;
     draft: boolean;
 
+}
+
+const InputValidationMiddleware: express.RequestHandler = (req, res, next) => {
+    const postData: PostData = req.body
+    if (!postData.title) {
+        return res.status(403).send({ error: "title field is required" })
+    }
+    if (!postData.body) {
+        return res.status(403).send({ error: "body field is required!" })
+    }
+
+    next();
 }
 
 let posts: BlogPost[] = [];
@@ -30,15 +43,12 @@ app.get('/posts/:id', (req, res) => {
 })
 
 
-app.post('/posts/', (req, res) => {
-    const postData:  Pick<BlogPost, 'body' | 'title'> = req.body;
-
-    if(!postData.title || !postData.body){
-        return res.status(403).send({error: "title field is required"});
-    }
-    if(!postData.body || !postData.body){
-        return res.status(403).send({error: "body field is required"});
-    }
+app.post('/posts/', InputValidationMiddleware, (req, res) => {
+    const postData: Pick<BlogPost, 'body' | 'title'> = req.body;
+    // try { InputValidationMiddleware(postData) }
+    // catch (error) {
+    //     return res.status(403).send(error)
+    // }
 
     const lastPost = posts[posts.length - 1]
     let id = 0;
@@ -63,22 +73,18 @@ app.delete('/posts/:id', (req, res) => {
     if (!postToDelete) {
         return res.status(404).send({ msg: 'not found' });
     }
-   posts = posts.filter(post => post.id !== postToDelete.id)
-   return res.send(postToDelete)
+    posts = posts.filter(post => post.id !== postToDelete.id)
+    return res.send(postToDelete)
 })
 
 
-app.put('/posts/:id', (req, res) => {
+app.put('/posts/:id', InputValidationMiddleware, (req, res) => {
     const id = Number(req.params.id)
-    const postData: Pick<BlogPost, 'title' | 'body'> =  req.body;
-
-    if(!postData.title || !postData.body){
-        return res.status(403).send({error: "title field is required"});
-    }
-    if(!postData.body || !postData.body){
-        return res.status(403).send({error: "body field is required"});
-    }
-
+    const postData: Pick<BlogPost, 'title' | 'body'> = req.body;
+    // try { InputValidationMiddleware(postData) }
+    // catch (error) {
+    //     return res.status(403).send(error)
+    // }
     const postToUpdateIndex = posts.findIndex((post) => post.id === id)
     if (!posts[postToUpdateIndex]) {
         return res.status(404).send({ msg: 'not found' });
@@ -101,6 +107,17 @@ app.post('/posts/:id/public', (req, res) => {
     posts[postToPublicIdx].draft = true
     return res.send(posts[postToPublicIdx]);
 })
+
+
+type PostData = Pick<BlogPost, 'title' | 'body'>;
+// const InputValidationMiddleware = (postData: PostData) => {
+//     if (!postData.title) {
+//         throw new Error("title field is required!")
+//     }
+//     if (!postData.body) {
+//         throw new Error("body field is required!")
+//     }
+// }
 
 
 
